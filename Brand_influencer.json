@@ -1,0 +1,254 @@
+{
+  "name": "Brand-influencer",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1FB0RJ4TzDl5H93eAg7daTIVDhEcYW8uk5ak5OZvWFIA",
+          "mode": "list",
+          "cachedResultName": "Influencer Check list ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FB0RJ4TzDl5H93eAg7daTIVDhEcYW8uk5ak5OZvWFIA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1508555901,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FB0RJ4TzDl5H93eAg7daTIVDhEcYW8uk5ak5OZvWFIA/edit#gid=1508555901"
+        },
+        "includeInOutput": "both",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        20
+      ],
+      "id": "b02f235a-2083-4521-9ddf-57821e777395",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "YK100jlLBvHodBIP",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash-8b-001",
+        "options": {
+          "maxOutputTokens": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        220
+      ],
+      "id": "01a1caff-55db-45a6-ab52-6e70b4cc2625",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hXVFOeTqmZyi65KJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code').item.json['Contact Email'] }}",
+        "subject": "Greetings",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -40,
+        20
+      ],
+      "id": "95e7fcca-7dfd-4ab8-808f-b2bb9bfc3f9c",
+      "name": "Gmail",
+      "webhookId": "ba539fdd-fb0b-4ccf-9978-d11004c8e735",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "19iRRNYrs5C8HRrm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "q",
+              "value": " fashion design"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "maxResults",
+              "value": "10"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyAG5ZpMnevV2g3F6MeVVmn7pe7Iq1VcCJg"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -200,
+        220
+      ],
+      "id": "0b87ac18-7368-4c3c-a364-576ee7ec4949",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this influencer campaign request:\n\nBrand: {{ $('Code').item.json['Brand name'] }}\nContact:{{ $('Code').item.json['Contact Email'] }}\nGoal: {{ $('Code').item.json['Campaign Objective Briefly describe the goal (e.g, product awareness, lead generation)'] }}\nPlatforms: {{ $('Code').item.json['Preferred social media platforms'] }}\nBudget: {{ $('Code').item.json['Campaign Budget (eg. 5000 )'] }}\n\nPlease provide a plain-text, human-friendly analysis including:\n1. Suitable influencer categories\n2. Recommended platforms\n3. A realistic ROI analysis based on the provided budget\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -420,
+        20
+      ],
+      "id": "3db26dac-02e7-41db-aa25-aafafe3d7506",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "console.log(\"Sending email to:\", $json[\"Contact Email\"]);\nreturn $input.all();\n\nconsole.log('Data being processed:', $json);\nreturn $json;\n\nconsole.log($json); \nreturn $json;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -840,
+        20
+      ],
+      "id": "04deb155-2a3b-41a9-9ce7-5532b8ca3aec",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"nodes\": [\n    {\n      \"parameters\": {\n        \"values\": {\n          \"string\": [\n            {\n              \"name\": \"Brand\",\n              \"value\": \"={{ $json[\\\"Brand name\\\"] }}\"\n            },\n            {\n              \"name\": \"Contact Email\",\n              \"value\": \"={{ $json[\\\"Contact Email\\\"] }}\"\n            },\n            {\n              \"name\": \"Goal\",\n              \"value\": \"={{ $json[\\\"Campaign Objective Briefly describe the goal\\\"] }}\"\n            },\n            {\n              \"name\": \"Platforms\",\n              \"value\": \"={{ $json[\\\"Preferred social media platforms\\\"] }}\"\n            },\n            {\n              \"name\": \"Budget\",\n              \"value\": \"={{ $json[\\\"Campaign Budget (eg. 5000 )\\\"] }}\"\n            }\n          ]\n        }\n      },\n      \"name\": \"Set\",\n      \"type\": \"n8n-nodes-base.set\",\n      \"position\": [\n        300,\n        300\n      ]\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        20
+      ],
+      "id": "f3b6338b-acc4-4709-a446-796bf70efdbc",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9ebc9007-ef70-44ed-b678-988653507642",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d28011a62704df9ff694eeb9993396e20468f12666d99a5b4a4b4ea112937141"
+  },
+  "id": "mtFERuwj8orNFbmq",
+  "tags": []
+}
